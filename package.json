@@ -1,0 +1,24 @@
+{
+  "name": "expressmongomlab",
+  "version": "1.0.0",
+  "description": "express and mongodb with mlab",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ccatto/expressmongomlab.git"
+  },
+  "keywords": [
+    "express",
+    "mongo",
+    "mlab"
+  ],
+  "author": "chris catto",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ccatto/expressmongomlab/issues"
+  },
+  "homepage": "https://github.com/ccatto/expressmongomlab#readme"
+}
