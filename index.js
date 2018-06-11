@@ -44,9 +44,17 @@ router.use(function(req, res, next) {
 router.get('/', function(req, res) {
   res.json({ message: 'hooray! welcome to our api!' });   
 });
+
+
+
+
+
+
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use('/api', router);
+
+
 
 
 
