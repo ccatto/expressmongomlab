@@ -1,0 +1,21 @@
+// src/models/bear.js
+
+// var mongoose     = require('mongoose');
+// var Schema       = mongoose.Schema;
+
+// var UserQuoteSchema   = new Schema({
+//     name: String,
+//     quoate: String
+// });
+
+// module.exports = mongoose.model('UserQuote', UserQuoteSchema);
+
+
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+
+var BearSchema = new Schema({
+    name: String
+});
+
+module.exports = mongoose.model('Bear', BearSchema);
