@@ -40,7 +40,8 @@ var db;
 
 
 ///// MONGOODSE!!!
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
 
 let uri = 'mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun';
 
@@ -62,6 +63,28 @@ dbMongoose.on('open', function () {
  });
 dbMongoose.on('error', console.error.bind(console, 'connection error:'));
 
+
+var ContactSchema = new Schema({
+  firstName: String,
+  lastName: String
+});
+
+var ContactModel = mongoose.model('ContactModel', ContactSchema);
+//var UserModel = mongoose.model('User', User);
+
+var record = new ContactModel();
+
+record.firstName = "Joe";
+record.lastName = "Jones";
+
+record.save(function (err) {
+  if (err) return handleError(err);
+  console.log("here it was saved!");
+})
+
+app.post("/addcontact", (req, res) => {
+  console.log("inside /addcontact POST");
+});
 
 
 // Create simple schema:
@@ -87,6 +110,10 @@ function handleError(res, reason, message, code) {
  *    GET: finds all contacts
  *    POST: creates a new contact
  */
+
+// app.get('/', (req, res) => res.send('Hello World!'));
+
+app.listen(3008, () => console.log('Example app listening on port 3008!'))
 
 app.get("/contacts", function(req, res) {
   console.log("inside /contact GET");

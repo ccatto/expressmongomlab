@@ -1,12 +1,130 @@
-// index.js
+// // index.js
 
 var express = require("express");
 var path = require("path");
 var bodyParser = require("body-parser");
 var mongodb = require("mongodb");
+const MongoClient = require('mongodb').MongoClient;
+
 var ObjectID = mongodb.ObjectID;
 
-var TEST_COLLECTION = "testcollection";
+var CONTACTS_COLLECTION = "contacts";
+var collectionName = "testcollection";
+var app = express();
+app.use(express.static(__dirname + "/public"));
+app.use(bodyParser.json());
+
+// Create a database variable outside of the database connection callback to reuse the connection pool in your app.
+var db;
+
+// Connect to the database before starting the application server.
+// MongoClient.connect('mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun', (err, database) => {
+
+// // mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
+//   if (err) {
+//     console.log(err);
+//     process.exit(1);
+//   }
+
+//   // Save database object from the callback for reuse.
+//   db = database;
+//   console.log("Database connection ready");
+
+//   // Initialize the app.
+//   var server = app.listen(process.env.PORT || 8080, function () {
+//     var port = server.address().port;
+//     console.log("App now running on port", port);
+//   });
+// });
+
+
+///// MONGOODSE!!!
+var mongoose = require('mongoose');
+
+let uri = 'mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun';
+
+mongoose.connect(uri);
+
+// mongoose.connect(uri).exec()
+//     .then(() => { // if all is ok we will be here
+//         // console.log("all good in Mongoose");
+//         return server.start();
+//     })
+//     .catch(err => { // if error we will be here
+//         console.error('App starting error:', err.stack);
+//         process.exit(1);
+//     });
+
+let dbMongoose = mongoose.connection;
+dbMongoose.on('open', function () {
+  console.log("inside mongoose connect open ");
+});
+dbMongoose.on('error', console.error.bind(console, 'connection error:'));
+
+// Create simple schema:
+
+// var nameSchema = new mongoose.Schema({
+//   firstName: String,
+//   lastNameName: String
+// });
+
+// // create model from schema:
+// var User = mongoose.model("User", nameSchema);
+
+
+// CONTACTS API ROUTES BELOW
+
+// Generic error handler used by all endpoints.
+function handleError(res, reason, message, code) {
+  console.log("ERROR: " + reason);
+  res.status(code || 500).json({ "error": message });
+}
+
+/*  "/contacts"
+ *    GET: finds all contacts
+ *    POST: creates a new contact
+ */
+
+app.get("/contacts", function (req, res) {
+  console.log("inside /contact GET");
+});
+
+// POST
+app.post("/contacts", function (req, res) {
+
+  var newContact = req.body;
+  newContact.createDate = new Date();
+
+  if (!(req.body.firstName || req.body.lastName)) {
+    handleError(res, "Invalid user input", "Must provide a first or last name.", 400);
+  }
+
+  db.collection(CONTACTS_COLLECTION).insertOne(newContact, function (err, doc) {
+    if (err) {
+      handleError(res, err.message, "Failed to create new contact.");
+    } else {
+      res.status(201).json(doc.ops[0]);
+    }
+  });
+});
+
+/*  "/contacts/:id"
+ *    GET: find contact by id
+ *    PUT: update contact by id
+ *    DELETE: deletes contact by id
+ */
+
+app.get("/contacts/:id", function (req, res) {});
+
+// older version below:
+// // var express = require("express");
+// // var path = require("path");
+// // var bodyParser = require("body-parser");
+// // var mongodb = require("mongodb");
+// // var ObjectID = mongodb.ObjectID;
+
+// // var TEST_COLLECTION = "testcollection";
+
 
 // // app.js
 // console.log("HERER");
@@ -101,7 +219,7 @@ var TEST_COLLECTION = "testcollection";
 
 
 // // var itemRouter = express.Router();
-// // app.use('/items', itemRouter);
+// // app.use('/items', itemRouter); 
 
 // // itemRouter.route('/').get(function (req, res) {
 // //     res.sendfile('./server/public/index.html');
