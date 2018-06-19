@@ -3,19 +3,118 @@
 var express = require("express");
 var path = require("path");
 var bodyParser = require("body-parser");
+
 var mongodb = require("mongodb");
 const MongoClient = require('mongodb').MongoClient
-
 var ObjectID = mongodb.ObjectID;
 
 var CONTACTS_COLLECTION = "contacts";
 var collectionName = "testcollection";
 var app = express();
-app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json());
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
 
 // Create a database variable outside of the database connection callback to reuse the connection pool in your app.
 var db;
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
+let uri = 'mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun';
+ mongoose.connect(uri);
+ let dbMongoose = mongoose.connection;
+ dbMongoose.on('open', function () { 
+   console.log("inside mongoose connect open to: ", uri);
+  });
+ dbMongoose.on('error', console.error.bind(console, 'connection error:'));
+  
+ var ContactSchema = new Schema({
+   firstName: String,
+   lastName: String
+ });
+ 
+ var ContactModel = mongoose.model('ContactModel', ContactSchema);
+ var record = new ContactModel();
+
+
+app.get('/',(req,res)=>{
+  console.log("HERE insdie the /");
+  res.sendFile(__dirname + '/public/index.html');
+  //  response.send("Hello world");
+});
+
+app.post("/addcontact", (req, res) => {
+  // var firstName = req.body.firstName;
+  // console.log("inside /addcontact POST", firstName);
+  if (!req.body) return res.sendStatus(400)
+  console.log("insdie post ");
+  console.log("body -- ", req.body);
+  console.log("firstName -- ", req.body.firstName);
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+app.post("/api/addcontact", (req, res) => {
+  var firstName = req.body.firstName;
+  console.log("firstName == ", firstName);
+  console.log("body -- ", req.body);
+  console.log("inside add /addcontact POST");
+
+ record.firstName = firstName;
+ record.lastName = "Jones";
+ 
+ record.save(function (err) {
+   if (err) return handleError(err);
+   console.log("here it was saved!");
+ })
+
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+
+
+
+
+
+// var newContact = req.body;
+// newContact.createDate = new Date();
+
+// if (!(req.body.firstName || req.body.lastName)) {
+//   handleError(res, "Invalid user input", "Must provide a first or last name.", 400);
+// }
+
+// db.collection(CONTACTS_COLLECTION).insertOne(newContact, function(err, doc) {
+//   if (err) {
+//     handleError(res, err.message, "Failed to create new contact.");
+//   } else {
+//     res.status(201).json(doc.ops[0]);
+//   }
+// });
+
+// If the Node process ends, close the Mongoose connection 
+process.on('SIGINT', function() {  
+  mongoose.connection.close(function () { 
+    console.log('Mongoose default connection disconnected through app termination'); 
+    process.exit(0); 
+  }); 
+}); 
+
+// Generic error handler used by all endpoints.
+function handleError(res, reason, message, code) {
+  console.log("ERROR: " + reason);
+  res.status(code || 500).json({"error": message});
+}
+
+app.listen(3008, () => console.log('Example app listening on port 3008!'))
+
+
+
+
+
+//////////////////// //////////////////// ////////////////////
+//////////////////// Old Comments         ////////////////////
+//////////////////// //////////////////// ////////////////////
+
+// app.get('/', (req, res) => res.send('Hello World!'));
 
 // Connect to the database before starting the application server.
 // MongoClient.connect('mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun', (err, database) => {
@@ -40,12 +139,10 @@ var db;
 
 
 ///// MONGOODSE!!!
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
 
-let uri = 'mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun';
 
- mongoose.connect(uri);
+// if we want form in public directory use line below up top:
+// app.use(express.static(__dirname + "/public"));
 
 // mongoose.connect(uri).exec()
 //     .then(() => { // if all is ok we will be here
@@ -57,34 +154,6 @@ let uri = 'mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun';
 //         process.exit(1);
 //     });
 
-let dbMongoose = mongoose.connection;
-dbMongoose.on('open', function () { 
-  console.log("inside mongoose connect open ");
- });
-dbMongoose.on('error', console.error.bind(console, 'connection error:'));
-
-
-var ContactSchema = new Schema({
-  firstName: String,
-  lastName: String
-});
-
-var ContactModel = mongoose.model('ContactModel', ContactSchema);
-//var UserModel = mongoose.model('User', User);
-
-var record = new ContactModel();
-
-record.firstName = "Joe";
-record.lastName = "Jones";
-
-record.save(function (err) {
-  if (err) return handleError(err);
-  console.log("here it was saved!");
-})
-
-app.post("/addcontact", (req, res) => {
-  console.log("inside /addcontact POST");
-});
 
 
 // Create simple schema:
@@ -98,49 +167,51 @@ app.post("/addcontact", (req, res) => {
 // var User = mongoose.model("User", nameSchema);
 
 
-// CONTACTS API ROUTES BELOW
+// // CONTACTS API ROUTES BELOW
 
-// Generic error handler used by all endpoints.
-function handleError(res, reason, message, code) {
-  console.log("ERROR: " + reason);
-  res.status(code || 500).json({"error": message});
-}
+// // Generic error handler used by all endpoints.
+// function handleError(res, reason, message, code) {
+//   console.log("ERROR: " + reason);
+//   res.status(code || 500).json({"error": message});
+// }
 
-/*  "/contacts"
- *    GET: finds all contacts
- *    POST: creates a new contact
- */
+// /*  "/contacts"
+//  *    GET: finds all contacts
+//  *    POST: creates a new contact
+//  */
 
-// app.get('/', (req, res) => res.send('Hello World!'));
 
-app.listen(3008, () => console.log('Example app listening on port 3008!'))
 
-app.get("/contacts", function(req, res) {
-  console.log("inside /contact GET");
-});
+// // app.get('/', (req, res) => res.send('Hello World!'));
+
+// app.listen(3008, () => console.log('Example app listening on port 3008!'))
+
+// app.get("/contacts", function(req, res) {
+//   console.log("inside /contact GET");
+// });
 
 // POST
-app.post("/contacts", function(req, res) {
+// app.post("/contacts", function(req, res) {
 
 
-    var newContact = req.body;
-    newContact.createDate = new Date();
+//     var newContact = req.body;
+//     newContact.createDate = new Date();
 
-    if (!(req.body.firstName || req.body.lastName)) {
-      handleError(res, "Invalid user input", "Must provide a first or last name.", 400);
-    }
+//     if (!(req.body.firstName || req.body.lastName)) {
+//       handleError(res, "Invalid user input", "Must provide a first or last name.", 400);
+//     }
 
-    db.collection(CONTACTS_COLLECTION).insertOne(newContact, function(err, doc) {
-      if (err) {
-        handleError(res, err.message, "Failed to create new contact.");
-      } else {
-        res.status(201).json(doc.ops[0]);
-      }
-    });
+//     db.collection(CONTACTS_COLLECTION).insertOne(newContact, function(err, doc) {
+//       if (err) {
+//         handleError(res, err.message, "Failed to create new contact.");
+//       } else {
+//         res.status(201).json(doc.ops[0]);
+//       }
+//     });
 
 
 
-});
+// });
 
 /*  "/contacts/:id"
  *    GET: find contact by id
@@ -148,8 +219,8 @@ app.post("/contacts", function(req, res) {
  *    DELETE: deletes contact by id
  */
 
-app.get("/contacts/:id", function(req, res) {
-});
+// app.get("/contacts/:id", function(req, res) {
+// });
 
 
 

@@ -3,19 +3,79 @@
 var express = require("express");
 var path = require("path");
 var bodyParser = require("body-parser");
+
 var mongodb = require("mongodb");
 const MongoClient = require('mongodb').MongoClient;
-
 var ObjectID = mongodb.ObjectID;
 
 var CONTACTS_COLLECTION = "contacts";
 var collectionName = "testcollection";
 var app = express();
-app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json());
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+// if we want form in public directory use line below:
+// app.use(express.static(__dirname + "/public"));
+
+
+app.get('/', (req, res) => {
+  console.log("HERE insdie the /");
+  res.sendFile(__dirname + '/public/index.html');
+  //  response.send("Hello world");
+});
+
+app.post("/addcontact", (req, res) => {
+  // var firstName = req.body.firstName;
+  // console.log("inside /addcontact POST", firstName);
+  if (!req.body) return res.sendStatus(400);
+  console.log("insdie post ");
+  console.log("body -- ", req.body);
+  console.log("firstName -- ", req.body.firstName);
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+app.post("/api/addcontact", bodyParser, (req, res) => {
+  var firstName = req.body.firstName;
+  console.log("firstName == ", firstName);
+  console.log("body -- ", req.body);
+  console.log("inside add /addcontact POST");
+  res.sendFile(__dirname + '/public/index.html');
+});
 
 // Create a database variable outside of the database connection callback to reuse the connection pool in your app.
 var db;
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
+let uri = 'mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun';
+mongoose.connect(uri);
+let dbMongoose = mongoose.connection;
+dbMongoose.on('open', function () {
+  console.log("inside mongoose connect open to: ", uri);
+});
+dbMongoose.on('error', console.error.bind(console, 'connection error:'));
+
+var ContactSchema = new Schema({
+  firstName: String,
+  lastName: String
+});
+
+var ContactModel = mongoose.model('ContactModel', ContactSchema);
+var record = new ContactModel();
+record.firstName = "Paul";
+record.lastName = "Jones";
+
+// record.save(function (err) {
+//   if (err) return handleError(err);
+//   console.log("here it was saved!");
+// })
+
+// If the Node process ends, close the Mongoose connection 
+process.on('SIGINT', function () {
+  mongoose.connection.close(function () {
+    console.log('Mongoose default connection disconnected through app termination');
+    process.exit(0);
+  });
+});
 
 // Connect to the database before starting the application server.
 // MongoClient.connect('mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun', (err, database) => {
@@ -39,11 +99,7 @@ var db;
 
 
 ///// MONGOODSE!!!
-var mongoose = require('mongoose');
 
-let uri = 'mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun';
-
-mongoose.connect(uri);
 
 // mongoose.connect(uri).exec()
 //     .then(() => { // if all is ok we will be here
@@ -55,11 +111,6 @@ mongoose.connect(uri);
 //         process.exit(1);
 //     });
 
-let dbMongoose = mongoose.connection;
-dbMongoose.on('open', function () {
-  console.log("inside mongoose connect open ");
-});
-dbMongoose.on('error', console.error.bind(console, 'connection error:'));
 
 // Create simple schema:
 
@@ -84,6 +135,10 @@ function handleError(res, reason, message, code) {
  *    GET: finds all contacts
  *    POST: creates a new contact
  */
+
+// app.get('/', (req, res) => res.send('Hello World!'));
+
+app.listen(3008, () => console.log('Example app listening on port 3008!'));
 
 app.get("/contacts", function (req, res) {
   console.log("inside /contact GET");
