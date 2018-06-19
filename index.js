@@ -19,39 +19,155 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // Create a database variable outside of the database connection callback to reuse the connection pool in your app.
 var db;
 var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+  Schema = mongoose.Schema;
 let uri = 'mongodb://ccatto:s1mple@ds147789.mlab.com:47789/cattomlabfun';
- mongoose.connect(uri);
- let dbMongoose = mongoose.connection;
- dbMongoose.on('open', function () { 
-   console.log("inside mongoose connect open to: ", uri);
-  });
- dbMongoose.on('error', console.error.bind(console, 'connection error:'));
-  
- var ContactSchema = new Schema({
-   firstName: String,
-   lastName: String
- });
- 
- var ContactModel = mongoose.model('ContactModel', ContactSchema);
- var record = new ContactModel();
+mongoose.connect(uri);
+let dbMongoose = mongoose.connection;
+dbMongoose.on('open', function () {
+  console.log("inside mongoose connect open to: ", uri);
+});
+dbMongoose.on('error', console.error.bind(console, 'connection error:'));
 
+var ContactSchema = new Schema({
+  firstName: String,
+  lastName: String
+});
 
-app.get('/',(req,res)=>{
+var ContactModel = mongoose.model('ContactModel', ContactSchema);
+var record = new ContactModel();
+var contactModelRecord = new ContactModel();
+
+////////// /////////////////   ////////// /////////////////
+////////// Routes              /////////////////  
+////////// /////////////////   ////////// ///////////////// 
+app.get('/', (req, res) => {
   console.log("HERE insdie the /");
+  // record.find({})
+  //   .exec(function(err, data){
+  //     if(err){
+  //       res.send('An Error has Ocurr');
+  //     }else {
+  //       console.log("No Error so Far");
+  //       console.log(data);
+  //       res.json(data);
+  //     }
+  //   });
+  console.log("here");
   res.sendFile(__dirname + '/public/index.html');
   //  response.send("Hello world");
 });
 
-app.post("/addcontact", (req, res) => {
-  // var firstName = req.body.firstName;
-  // console.log("inside /addcontact POST", firstName);
-  if (!req.body) return res.sendStatus(400)
-  console.log("insdie post ");
-  console.log("body -- ", req.body);
-  console.log("firstName -- ", req.body.firstName);
-  res.sendFile(__dirname + '/public/index.html');
-});
+app.get('/api/getallcontacts', (req, res) => {
+  console.log("inside Get All Contacts");
+  ContactModel.find({}, (err, contact) => {
+    console.log("about to retrun all contacts", contact);
+    res.json(contact)
+  })
+})
+
+app.get('/api/getcontactbyname', (req, res) => {
+  console.log("inside Get Contact by Name");
+
+  ContactModel.find({ firstName: "john" }, (err, contact) => {
+    if (err) return res.status(500).send(err)
+    console.log("contact ", contact);
+    // send the list of all people in database with name of "John James" and age of 36
+    // Very possible this will be an array with just one Person object in it.
+    return res.status(200).send(contact);
+  });
+})
+
+app.get('/api/getconactbyid', (req, res) => {
+  // app.get('/api/getcontactbyname2', (req,res)=>{
+  console.log("inside Get Contact by Name");
+  var id = "5b282299a8dfd0ea8603ffa9";
+  ContactModel.findById(id, function (err, contact) {
+    if (err) return res.status(500).send(err)
+    console.log("get contact by ID");
+    return res.status(200).send(contact);
+  });
+})
+
+
+
+app.get('/api/updateconactbyid', (req, res) => {
+  // app.get('/api/getcontactbyname2', (req,res)=>{
+  console.log("inside Get Contact by Name");
+  var id = "5b282299a8dfd0ea8603ffa9";
+
+  ContactModel.findByIdAndUpdate(
+    id,
+    {firstName: "Jennifer"},
+    {new: true},
+    function(err, contact) {
+      if (err) throw err;
+      console.log("get contact by ID");
+      return res.status(200).send(contact);
+  });
+  // ContactModel.findById(id, function (err, contact) {
+  //   if (err) return res.status(500).send(err)
+  //   console.log("get contact by ID");
+  //   return res.status(200).send(contact);
+  // });
+})
+
+
+
+// Model.findByIdAndUpdate(id, updateObj, {new: true}, function(err, model) {
+
+
+// ContactModel.find({ "firstName" : "John" })
+// .exec(function (err, contact) {
+//   if (err) return handleError(err);
+//   console.log("contact ", contact);
+//   // returns all stories that have Bob's id as their author.
+// });
+
+// ContactModel.find({}, (err, contact) => {
+//   console.log("about to retrun all contacts", contact);
+//   res.json(contact)
+// })
+
+
+app.get('/api/findbyid2', (req, res) => {
+  console.log("Find By ID");
+  var id = "5b282299a8dfd0ea8603ffa9";
+  // ContactModel.find({firstName: "john"}, (err, contact) =>{  
+  //     if (err) return res.status(500).send(err)
+  //     console.log("contact ", contact);
+  //     // send the list of all people in database with name of "John James" and age of 36
+  //     // Very possible this will be an array with just one Person object in it.
+  //     return res.status(200).send(contact);
+  // });
+})
+// ContactModel.findByIdAndUpdate(id, function(err, ContactModel) {
+//   if (err) {
+//     console.log("ERRROR finding by id");
+//     return;
+//     //   logger.error(modelString +':edit' + modelString +' - ' + err.message);
+//     //   self.emit('item:failure', 'Failed to edit ' + modelString);
+//   }
+//   console.log("ContactModel == ", ContactModel)
+//   //   self.emit('item:success', moContactModeldel);
+//   // }
+// });
+
+
+// static response example
+app.post('/api/updatecontactbyid', (req, res) => {
+  console.log("HERE ins die update by id");
+  var id = "5b282299a8dfd0ea8603ffa9";
+  ContactModel.findByIdAndUpdate(id, updateObj, { new: true }, function (err, ContactModel) {
+    if (err) {
+      console.log("ERRROR finding by id");
+      return;
+      //   logger.error(modelString +':edit' + modelString +' - ' + err.message);
+      //   self.emit('item:failure', 'Failed to edit ' + modelString);
+    }
+    //   self.emit('item:success', moContactModeldel);
+    // }
+  });
+})
 
 app.post("/api/addcontact", (req, res) => {
   var firstName = req.body.firstName;
@@ -59,21 +175,38 @@ app.post("/api/addcontact", (req, res) => {
   console.log("body -- ", req.body);
   console.log("inside add /addcontact POST");
 
- record.firstName = firstName;
- record.lastName = "Jones";
- 
- record.save(function (err) {
-   if (err) return handleError(err);
-   console.log("here it was saved!");
- })
+  record.firstName = firstName;
+  record.lastName = "Jones";
+
+  record.save(function (err) {
+    if (err) return handleError(err);
+    console.log("here it was saved!");
+  })
 
   res.sendFile(__dirname + '/public/index.html');
 });
 
+// static response example
+app.get('/api/books/2', (req, res) => {
+  res.json(
+    {
+      id: 2,
+      title: "Einstein's Dreams",
+      author: "Alan Lightman"
+    }
+  )
+})
 
 
-
-
+// app.post("/addcontact", (req, res) => {
+//   // var firstName = req.body.firstName;
+//   // console.log("inside /addcontact POST", firstName);
+//   if (!req.body) return res.sendStatus(400)
+//   console.log("insdie post ");
+//   console.log("body -- ", req.body);
+//   console.log("firstName -- ", req.body.firstName);
+//   res.sendFile(__dirname + '/public/index.html');
+// });
 
 // var newContact = req.body;
 // newContact.createDate = new Date();
@@ -91,18 +224,20 @@ app.post("/api/addcontact", (req, res) => {
 // });
 
 // If the Node process ends, close the Mongoose connection 
-process.on('SIGINT', function() {  
-  mongoose.connection.close(function () { 
-    console.log('Mongoose default connection disconnected through app termination'); 
-    process.exit(0); 
-  }); 
-}); 
+process.on('SIGINT', function () {
+  mongoose.connection.close(function () {
+    console.log('Mongoose default connection disconnected through app termination');
+    process.exit(0);
+  });
+});
 
 // Generic error handler used by all endpoints.
 function handleError(res, reason, message, code) {
   console.log("ERROR: " + reason);
-  res.status(code || 500).json({"error": message});
+  res.status(code || 500).json({ "error": message });
 }
+
+// require('./src/routes')(app, {});
 
 app.listen(3008, () => console.log('Example app listening on port 3008!'))
 
@@ -350,7 +485,7 @@ app.listen(3008, () => console.log('Example app listening on port 3008!'))
 
 // //     // res.render('items');
 // //   });
-  
+
 // //    itemRouter.route('/single').get(function (req, res) {
 // // //     res.render('singleItem');
 // // res.sendfile('./server/public/index.html');
