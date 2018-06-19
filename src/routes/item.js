@@ -11,9 +11,21 @@ router.get('/item', function(req, res) {
   res.send('itemNamezz, 888')
 })
 
-// // Car models page
-// router.get('/models', function(req, res) {
-//   res.send('Audi Q7, BMW X5, Mercedes GL')
-// })
+// Post item page
+router.post('/api/createitem', function(req, res) {
+    console.log("inside api/create item");
+
+    var record = new Item();
+    record.itemName = "some item name";
+    record.itemNumber = 888;
+  
+    record.save(function (err) {
+      if (err) return handleError(err);
+      console.log("here item was saved!");
+    })
+
+
+    res.send('soso item created ishL')
+})
 
 module.exports = router
