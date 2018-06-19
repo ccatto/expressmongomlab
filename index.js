@@ -239,7 +239,9 @@ function handleError(res, reason, message, code) {
 
 // require('./src/routes')(app, {});
 // require('./src/routes')(app, {});
-app.use(require('./src/routes/cars'));
+// app.use(require('./src/routes/cars'));
+app.use(require('./src/routes'));
+  //  app.use(require('./src/routes/allroutes'));
 
 app.listen(3008, () => console.log('Example app listening on port 3008!'))
 

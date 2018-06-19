@@ -5,10 +5,9 @@ var express = require('express')
   , router = express.Router()
 
 
-  router.use(require('./cars'));
-  router.use(require('./item'));
-
 // router.use('/cars', require('./cars'))
+
+router.use(require('./cars'));
 
 // router.get('/', function(req, res) {
 //     console.log("here ins index routher ");
