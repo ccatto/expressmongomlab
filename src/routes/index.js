@@ -7,6 +7,7 @@ var express = require('express')
 
   router.use(require('./cars'));
   router.use(require('./item'));
+  router.use(require('./customer'));
 
 // router.use('/cars', require('./cars'))
 
